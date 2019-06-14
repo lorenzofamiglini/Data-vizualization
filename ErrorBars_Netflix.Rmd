@@ -1,0 +1,309 @@
+---
+title: "Data Viz- GGplot2"
+author: "Lorenzo Famiglini"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  prettydoc::html_pretty:
+    theme: cayman
+---
+How can we create an amazing viz?
+Attention to detail!
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+```
+
+```{r}
+df <- read.csv("/Users/lorenzofamiglini/Dropbox/Data_Management/dataframes_grafici/medie_stdv_genere.csv")
+df$genre %>% recode("Action" = "Azione", 
+                    "Adventure" = "Avventura",
+                    "Animation" = "Animazione",
+                    "Biography" = "Biografia",
+                    "Comedy" = "Commedia",
+                    "Crime" = "Crimine", 
+                    "Documentary" = "Documentario", 
+                    "Drama" = "Drammatico", 
+                    "Family" = "Famiglia",
+                    "Fantasy" = "Fantasia",
+                    "Film-Noir" = "Film Noir",
+                    "History" = "Storia",
+                    "Music" = "Musica", 
+                    "Mystery" = "Mistero", 
+                    "Romance" = "Romantico",
+                    "Sci-Fi" = "Fantascienza",
+                    "Short" = "Cortometraggio", 
+                    "War" = "Guerra") -> df$genre
+df
+```
+
+
+
+```{r}
+std = df$stdv_diff_user_rot
+minr = df$estr_inf_rotten
+maxr = df$estr_sup_rotten
+```
+
+```{r}
+# Create a new theme
+theme_bluewhite <- function (base_size = 11, base_family = "") {
+    theme_bw() %+replace% 
+    theme(
+      panel.grid.major  = element_line(color = "grey94"),
+      panel.background = element_rect(color = "grey"),
+      panel.border = element_rect(color = "black", fill = NA),
+      axis.line = element_line(color = "grey"),
+      axis.ticks = element_line(color = "black"),
+      axis.text = element_text(color = "black")
+      )
+}
+```
+
+```{r}
+library(gganimate)
+library(transformr)
+library(dplyr)
+library(ggplot2)
+library(extrafont)
+
+m <- ggplot()  +
+    geom_point(data = df, aes(x = genre,y = diff_meta,color = "#000099"), alpha = 0.5) + 
+    geom_errorbar(data = df,aes(x = genre,y = diff_meta, ymin = estr_inf_meta, ymax = estr_sup_meta, color = "#000099"), alpha = 0.5, width=.3,position=position_dodge(0.1))+
+    geom_point(data = df, aes(x = genre,y = diff_rot, color = 'tomato'), alpha = 0.5) +
+    geom_errorbar(data = df, aes(x = genre,y = diff_rot, ymin = estr_inf_rotten,ymax = estr_sup_rotten,  color = "tomato"), alpha = 0.5,    width=.3, position=position_dodge(0.1))+
+    ylab('Differenza di voto medio per genere dei critici rispetto agli utenti') +
+  geom_line() + 
+  geom_hline(yintercept = 0, linetype="dotted", color = "#66CCFF", size = 1) +
+  geom_label(aes(x = 4, y = -0.08, label = "Accordo con gli utenti",label.size = 0.25, family="American Typewriter"),alpha = 0.5, fill = "#66CCFF")+
+  #geom_label(aes(x = 5, y = 1.4, label = "Per l 82% dei generi i critici di Rotten Tomato \n si avvicinano di molto ai gusti dell'utente",label.size = 0.01),color = "black") +
+  annotate("text", x = 4.1, y = 1.4, label = "Per l 82% dei generi i critici di Rotten Tomato \n si avvicinano di piu' ai gusti  dell'utente", fontface="bold") +
+  theme(text=element_text(size=16, family="American Typewriter")) + 
+  annotate("rect", xmin = 0.42, xmax = 7.7, ymin = 1.3, ymax = 1.49, alpha = .2, fill = "transparent", color = "black", linetype = "dashed") +
+  coord_cartesian(ylim = (-0.5:1.5)) +
+      labs(title="Di quanto si allontanano i critici, in media, rispetto agli utenti?",
+      subtitle="Mettiamo a confronto i siti di Metacritic e di Rotten Tomato rispetto agli utenti",
+      caption="Dai risultati si evidenzia che il sito di Rotten T. si avvicina di piu' al gusto dell'utente,\n tuttavia i critici rimangono abbastanza lontani dal gusto della massa",
+      y = "voto medio utente - voto medio critico",
+      x = "Generi dei film")+
+  scale_color_manual("Intervallo di confidenza \n della differenza", values = c("#000099", "tomato"), labels = c("Metacritic", "Rotten Tomato")) + 
+     theme_bluewhite() + 
+  theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    hjust=0.5,
+                                    lineheight=1.2),  # title
+            plot.subtitle=element_text(size=15, 
+                                       family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5,
+                                       color = "Black"),  # subtitle
+            plot.caption=element_text(size=15,family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5),
+            axis.title.x=element_text(vjust=4,  
+                                      size=15,family="American Typewriter" ),
+            axis.title.y=element_text(size=10, family="American Typewriter"),
+            axis.text.x=element_text(size=8, 
+                                     angle = 90,
+                                     vjust=.5),  
+            axis.text.y=element_text(size=10))  
+
+
+
+m 
+#m + annotate("text", x = df$genre[19], y = df$diff_meta[19], label = "Metacritic")
+
+19/23
+```
+
+```{r}
+ggplot()  +
+    geom_point(data = df, aes(x = genre,y = diff_meta,color = "#000099"), alpha = 0.5) + 
+    geom_errorbar(data = df,aes(x = genre,y = diff_meta, ymin = estr_inf_meta, ymax = estr_sup_meta, color = "#000099"), alpha = 0.5, width=.3,position=position_dodge(0.1))+
+    geom_point(data = df, aes(x = genre,y = diff_rot, color = 'tomato'), alpha = 0.5) +
+    geom_errorbar(data = df, aes(x = genre,y = diff_rot, ymin = estr_inf_rotten,ymax = estr_sup_rotten,  color = "tomato"), alpha = 0.5,    width=.3, position=position_dodge(0.1))+
+    ylab('Differenza di voto medio per genere dei critici rispetto agli utenti') +
+  geom_line() + 
+  geom_hline(yintercept = 0, linetype="dotted", color = "#66CCFF", size = 1) +
+  geom_label(aes(x = 4, y = -0.08, label = "Accordo con gli utenti",label.size = 0.25, family="American Typewriter"),alpha = 0.5, fill = "#66CCFF")+
+  #geom_label(aes(x = 5, y = 1.4, label = "Per l 82% dei generi i critici di Rotten Tomato \n si avvicinano di molto ai gusti dell'utente",label.size = 0.01),color = "black") +
+  annotate("text", x = 4.1, y = 1.4, label = "Per l 82% dei generi i critici di Rotten Tomato \n si avvicinano di piu' ai gusti  dell'utente", fontface="bold") +
+  theme(text=element_text(size=16, family="American Typewriter")) + 
+  annotate("rect", xmin = 0.42, xmax = 7.7, ymin = 1.3, ymax = 1.49, alpha = .2, fill = "transparent", color = "black", linetype = "dashed") +
+  coord_cartesian(ylim = (-0.5:1.5)) +
+      labs(title="Di quanto si allontanano i critici, in media, rispetto agli utenti?",
+      subtitle="Mettiamo a confronto i siti di Metacritic e di Rotten Tomato rispetto agli utenti",
+      caption="Dai risultati si evidenzia che il sito di Rotten T. si avvicina di piu' al gusto dell'utente,\n tuttavia i critici rimangono abbastanza lontani dal gusto della massa",
+      y = "voto medio utente - voto medio critico",
+      x = "Generi dei film")+
+  scale_color_manual("Intervallo di confidenza \n della differenza", values = c("#000099", "tomato"), labels = c("Metacritic", "Rotten Tomato")) + 
+     theme_bluewhite() + 
+  theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    hjust=0.5,
+                                    lineheight=1.2),  # title
+            plot.subtitle=element_text(size=15, 
+                                       family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5,
+                                       color = "Black"),  # subtitle
+            plot.caption=element_text(size=15,family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5),
+            axis.title.x=element_text(vjust=4,  
+                                      size=15,family="American Typewriter" ),
+            axis.title.y=element_text(size=10, family="American Typewriter"),
+            axis.text.x=element_text(size=8, 
+                                     angle = 90,
+                                     vjust=.5),  
+            axis.text.y=element_text(size=10)) + 
+  theme_pander()
+
+
+```
+
+```{r}
+theme_bluewhite <- function (base_size = 11, base_family = "") {
+    theme_bw() %+replace% 
+    theme(
+      panel.grid.major  = element_line(color = "grey94"),
+      panel.background = element_rect(color = "grey"),
+      panel.border = element_rect(color = "black", fill = NA),
+      axis.line = element_line(color = "grey"),
+      axis.ticks = element_line(color = "black"),
+      axis.text = element_text(color = "black")
+      )
+}
+```
+
+
+```{r}
+boxp <- ggplot()  +
+    #geom_point(data = df, aes(x = genre,y = diff_meta,color = "#330000"), alpha = 0.5) + 
+    geom_crossbar(data = df,aes(x = genre,y = diff_meta, ymin = estr_inf_meta, ymax = estr_sup_meta, color = "#330000"), alpha = 0.5,width = .3, position = position_dodge(1), size = 0.3)+
+    #geom_point(data = df, aes(x = genre,y = diff_rot, color = 'tomato'), alpha = 0.5) +
+    geom_crossbar(data = df, aes(x = genre,y = diff_rot, ymin = estr_inf_rotten,ymax = estr_sup_rotten,  color = "tomato"), alpha = 0.5, position = position_dodge(1), width = .3, size = 0.3)+
+    ylab('Differenza di voto medio per genere dei critici rispetto al pubblico') +
+  geom_line() + 
+  geom_hline(yintercept = 0, linetype="dotted", color = "#66CCFF", size = 1) +
+  geom_label(aes(x = 4, y = -0.1, label = "Area piu' apprezzata dai critici", family="American Typewriter"),alpha = 0.5, fill = "Grey")+#66CCFF
+  geom_label(aes(x = 4, y = 0.1, label = "Area piu' apprezzata dal pubblico", family="American Typewriter"),alpha = 0.5, fill = "Grey")+
+  annotate("text", x = 5, y = 1.4, label = "Per l 82% dei generi i critici di Rotten Tomato \n si avvicinano di piu' ai gusti  del pubblico", fontface="bold") +
+  theme(text=element_text(size=16, family="American Typewriter")) + 
+  annotate("rect", xmin = 0.9, xmax = 9, ymin = 1.3, ymax = 1.49, alpha = .2, fill = "transparent", color = "black", linetype = "dashed") +
+  annotate("segment", x = 15, xend = 13, y = 0.15, yend = 0.012, colour = "#66CCFF",  arrow=arrow(length = unit(0.1, "inches"))) +
+    annotate("text", x = 15, y = 0.2, label = "Accordo con il pubblico", size = 3) +
+  coord_cartesian(ylim = (-0.5:1.5)) +
+      labs(title="Quale e' la differenza per genere tra il gradimento del pubblico e quello dei critici?",
+      subtitle="Mettiamo a confronto i siti di Metacritic e di Rotten Tomatoes rispetto al pubblico divisi per genere",
+      caption="Dai risultati si evidenzia che il sito di Rotten T. si avvicina di piu' al gusto del pubblico,\n tuttavia i critici rimangono abbastanza lontani dal gusto della massa",
+      y = "Differenza di voto medio tra il pubblico e i critici",
+      x = "Generi dei film")+
+  scale_color_manual("Intervallo di confidenza \n della differenza", values = c("#003366", "#FF9966"), labels = c("Metacritic", "Rotten Tomatoes")) + 
+  theme_minimal() +
+  theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="tomato",
+                                    hjust=0.5,
+                                    lineheight=1.2),  # title
+            plot.subtitle=element_text(size=15, 
+                                       family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5,
+                                       color = "Black"),  # subtitle
+            plot.caption=element_text(size=12,family="American Typewriter",
+                                       face="bold",
+                                       hjust=0.5),
+            axis.title.x=element_text(vjust=4,  
+                                      size=15,family="American Typewriter" ),
+            axis.title.y=element_text(size=15, family="American Typewriter", hjust = 0.5),
+            axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),  
+            axis.text.y=element_text(size=10))
+  
+
+library(ggthemes)
+boxp
+ggsave("genres_ratings.png", plot = boxp, height=8.5, width=15.57)
+```
+
+
+```{r}
+pop <- read.csv("/Users/lorenzofamiglini/Desktop/tmdb-movies-new.csv")
+pop2 <- pop[,c("popularity","release_year")]
+pop2 <- aggregate(pop2, list(pop2$popularity), mean)
+pop2$release_year <- as.factor(pop2$release_year) #delete .0
+pop2 %>%
+    group_by(release_year) %>%
+    dplyr::summarize(Mean = mean(popularity, na.rm=TRUE)) -> pop2
+pop2
+```
+
+```{r}
+poplot <- ggplot(data = pop2, aes( x = release_year,y = Mean,group = 1)) +
+  geom_line(aes( x = release_year,y = Mean,color ="red")) + 
+   labs(title="La popolarita' dei film negli anni",
+          y = "Popolarita",
+           x = "Anno di uscita del film") + 
+      scale_color_manual("Media", values = c("red"),labels = " ") +
+      theme_minimal() +
+      theme(legend.position = c(0.08, 0.85),
+                legend.key = element_rect(colour ="grey"),
+                legend.direction = "horizontal",
+                legend.background = element_rect(fill = "transparent"), 
+                legend.title = element_text(colour="black", size=8, face="bold", family = "American Typewriter"))+
+      theme(axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),
+            axis.title.x=element_text(vjust=.5,  
+                                      size=15,family="American Typewriter"),
+            axis.title.y=element_text(vjust=.5,  
+                                      size=15,family="American Typewriter"),
+            plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="Black",
+                                    hjust=0.5,
+                                    lineheight=1.2))
+          
+
+```
+
+```{r}
+pop3 <- pop[,c("popularity","release_year")]
+pop3 <- count(pop3,release_year)
+hfilm <-ggplot(data = pop3, aes(x = release_year, y = n)) +
+ geom_bar(stat="identity", aes(fill = "red")) + 
+   labs(title="Quanti film sono stati prodotti negli ultimi anni?",
+          y = "Numero di film per ogni anno",
+           x = "Anno di uscita del film") +
+  guides(fill=FALSE) + #delete legend from fill
+      scale_x_continuous(breaks = unique(pop3$release_year)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+      theme_minimal() +
+      theme(axis.text.x=element_text(size=10, 
+                                     angle = 90,
+                                     vjust=.5),
+            axis.title.x=element_text(vjust=.5,  
+                                      size=10,family="American Typewriter"),
+            axis.title.y=element_text(vjust=.5,  
+                                      size=15,family="American Typewriter"),
+            plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    family="American Typewriter",
+                                    color="Black",
+                                    hjust=0.5,
+                                    lineheight=1.2))
+ggsave("popularity_trend.png", plot = poplot, height=8.5, width=15.57)
+ggsave("count_film_per_yrs.png", plot = hfilm, height=8.5, width=15.57)
+```
+
